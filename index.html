@@ -1,119 +1,248 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Life Elohim - App de Reunião</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Life Elohim</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icon.png" />
+  <meta name="theme-color" content="#b28bff" />
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    .hidden { display: none; }
-    .section { margin-bottom: 20px; }
-    button { margin-top: 10px; }
+    body { font-family: sans-serif; margin: 0; padding: 0; background: #f3f3f3; }
+    .tela, .step { display: none; padding: 20px; }
+    .visivel { display: block; }
+    button {
+      margin: 10px 0;
+      padding: 10px 20px;
+      background: #b28bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    input[type="text"], input[type="number"], input[type="date"] {
+      padding: 8px;
+      width: 100%;
+      margin: 5px 0 15px;
+    }
+    .lista label { display: block; margin-bottom: 8px; }
+    .marcado { font-weight: bold; color: #b28bff; }
+    .botoes { display: flex; gap: 10px; flex-wrap: wrap; }
+    .opcoes-sim-nao button { width: 100px; }
+    .resumo-box {
+      background: #fff;
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 0 10px #ccc;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
-  <h1>Life Elohim - App de Reunião</h1>
 
-  <!-- Tela inicial (sem login com Google) -->
-  <div id="home" class="section">
-    <h2>Bem-vindo</h2>
-    <button onclick="showSection('relatorio')">Criar Relatório</button>
-    <button onclick="showSection('editarRelatorio')">Editar Relatório</button>
-    <button onclick="showSection('resumo')">Ver Resumo</button>
+  <div id="tela-menu" class="tela visivel">
+    <h2>Menu</h2>
+    <button onclick="irPara('relatorio')">Fazer Relatórios</button>
+    <button onclick="irPara('verRelatorios')">Ver Relatórios</button>
   </div>
 
-  <!-- Criar Relatório -->
-  <div id="relatorio" class="section hidden">
-    <h2>Criar Relatório</h2>
-    <label>Membros Presentes:</label><br />
-    <input type="text" id="membros" placeholder="João, Maria..." /><br />
-    <label>Convidados:</label><br />
-    <input type="text" id="convidados" placeholder="Lucas, Ana..." /><br />
-    <label>Valor da Oferta:</label><br />
-    <input type="number" id="oferta" /><br />
-    <label>Houve supervisão?</label><br />
-    <select id="supervisao">
-      <option value="sim">Sim</option>
-      <option value="nao">Não</option>
-    </select><br />
-    <button onclick="salvarRelatorio()">Salvar</button>
-    <button onclick="showSection('home')">Voltar</button>
+  <!-- Etapas de Relatório -->
+  <div id="tela-relatorio" class="tela">
+    <div id="etapa-1" class="step visivel">
+      <h3>1. Data da Reunião</h3>
+      <input type="date" id="dataReuniao" />
+      <div class="botoes">
+        <button onclick="irPara('menu')">Voltar</button>
+        <button onclick="proximaEtapa(2)">Avançar</button>
+      </div>
+    </div>
+
+    <div id="etapa-2" class="step">
+      <h3>2. Membros Presentes</h3>
+      <div id="listaMembros" class="lista"></div>
+      <input type="text" id="novoMembro" placeholder="Novo membro" />
+      <div class="botoes">
+        <button onclick="adicionarPessoa('membro')">Adicionar</button>
+        <button onclick="proximaEtapa(3)">Avançar</button>
+        <button onclick="proximaEtapa(1)">Voltar</button>
+      </div>
+    </div>
+
+    <div id="etapa-3" class="step">
+      <h3>3. Convidados Presentes</h3>
+      <div id="listaConvidados" class="lista"></div>
+      <input type="text" id="novoConvidado" placeholder="Novo convidado" />
+      <div class="botoes">
+        <button onclick="adicionarPessoa('convidado')">Adicionar</button>
+        <button onclick="proximaEtapa(4)">Avançar</button>
+        <button onclick="proximaEtapa(2)">Voltar</button>
+      </div>
+    </div>
+
+    <div id="etapa-4" class="step">
+      <h3>4. Houve Supervisão?</h3>
+      <div class="opcoes-sim-nao">
+        <button onclick="definirSupervisao(true)">Sim</button>
+        <button onclick="definirSupervisao(false)">Não</button>
+      </div>
+      <div class="botoes">
+        <button onclick="proximaEtapa(5)">Avançar</button>
+        <button onclick="proximaEtapa(3)">Voltar</button>
+      </div>
+    </div>
+
+    <div id="etapa-5" class="step">
+      <h3>5. Valor da Oferta</h3>
+      <input type="number" id="valorOferta" placeholder="Valor em R$" />
+      <div class="botoes">
+        <button onclick="proximaEtapa(6); gerarResumoFinal()">Avançar</button>
+        <button onclick="proximaEtapa(4)">Voltar</button>
+      </div>
+    </div>
+
+    <div id="etapa-6" class="step">
+      <h3>6. Resumo</h3>
+      <div id="resumoFinal" class="resumo-box"></div>
+      <div class="botoes">
+        <button onclick="finalizarRelatorio()">Finalizar Relatório</button>
+        <button onclick="proximaEtapa(5)">Voltar</button>
+      </div>
+    </div>
   </div>
 
-  <!-- Editar Relatório (carregado com dados preenchidos) -->
-  <div id="editarRelatorio" class="section hidden">
-    <h2>Editar Relatório</h2>
-    <label>Membros Presentes:</label><br />
-    <input type="text" id="editMembros" /><br />
-    <label>Convidados:</label><br />
-    <input type="text" id="editConvidados" /><br />
-    <label>Valor da Oferta:</label><br />
-    <input type="number" id="editOferta" /><br />
-    <label>Houve supervisão?</label><br />
-    <select id="editSupervisao">
-      <option value="sim">Sim</option>
-      <option value="nao">Não</option>
-    </select><br />
-    <button onclick="salvarEdicao()">Salvar Edição</button>
-    <button onclick="showSection('home')">Voltar</button>
-  </div>
-
-  <!-- Resumo -->
-  <div id="resumo" class="section hidden">
-    <h2>Resumo</h2>
-    <div id="resumoConteudo"></div>
-    <button onclick="showSection('home')">Voltar</button>
+  <!-- Ver Relatórios -->
+  <div id="tela-verRelatorios" class="tela">
+    <h2>Ver Relatórios</h2>
+    <button onclick="mostrarResumo()">Ver Resumo dos Relatórios</button>
+    <button onclick="listarRelatorios()">Editar Relatórios</button>
+    <button onclick="irPara('menu')">Voltar</button>
+    <div id="relatoriosLista"></div>
+    <div id="resumoGeral" class="resumo-box"></div>
   </div>
 
   <script>
-    let relatorioSalvo = {
-      membros: '',
-      convidados: '',
-      oferta: '',
-      supervisao: ''
-    };
+    let membros = JSON.parse(localStorage.getItem('membros') || "[]");
+    let convidados = JSON.parse(localStorage.getItem('convidados') || "[]");
+    let relatorios = JSON.parse(localStorage.getItem('relatorios') || "[]");
+    let supervisao = false;
+    let indexEditando = null;
 
-    function showSection(id) {
-      document.querySelectorAll('.section').forEach(sec => sec.classList.add('hidden'));
-      document.getElementById(id).classList.remove('hidden');
-
-      if (id === 'editarRelatorio') preencherEdicao();
-      if (id === 'resumo') atualizarResumo();
+    function irPara(tela) {
+      document.querySelectorAll('.tela').forEach(t => t.classList.remove('visivel'));
+      document.querySelectorAll('.step').forEach(t => t.classList.remove('visivel'));
+      if (tela === 'relatorio') {
+        document.getElementById('etapa-1').classList.add('visivel');
+      }
+      document.getElementById('tela-' + tela).classList.add('visivel');
+      renderizarListas();
     }
 
-    function salvarRelatorio() {
-      relatorioSalvo.membros = document.getElementById('membros').value;
-      relatorioSalvo.convidados = document.getElementById('convidados').value;
-      relatorioSalvo.oferta = document.getElementById('oferta').value;
-      relatorioSalvo.supervisao = document.getElementById('supervisao').value;
-      alert('Relatório salvo!');
-      showSection('home');
+    function proximaEtapa(num) {
+      document.querySelectorAll('.step').forEach(e => e.classList.remove('visivel'));
+      document.getElementById('etapa-' + num).classList.add('visivel');
     }
 
-    function preencherEdicao() {
-      document.getElementById('editMembros').value = relatorioSalvo.membros;
-      document.getElementById('editConvidados').value = relatorioSalvo.convidados;
-      document.getElementById('editOferta').value = relatorioSalvo.oferta;
-      document.getElementById('editSupervisao').value = relatorioSalvo.supervisao;
+    function adicionarPessoa(tipo) {
+      let inputId = tipo === 'membro' ? 'novoMembro' : 'novoConvidado';
+      let nome = document.getElementById(inputId).value.trim();
+      if (!nome) return;
+      if (tipo === 'membro') membros.push(nome);
+      else convidados.push(nome);
+      localStorage.setItem('membros', JSON.stringify(membros));
+      localStorage.setItem('convidados', JSON.stringify(convidados));
+      document.getElementById(inputId).value = '';
+      renderizarListas();
     }
 
-    function salvarEdicao() {
-      relatorioSalvo.membros = document.getElementById('editMembros').value;
-      relatorioSalvo.convidados = document.getElementById('editConvidados').value;
-      relatorioSalvo.oferta = document.getElementById('editOferta').value;
-      relatorioSalvo.supervisao = document.getElementById('editSupervisao').value;
-      alert('Edição salva!');
-      showSection('home');
+    function renderizarListas(selecionadosM = [], selecionadosC = []) {
+      ['membros', 'convidados'].forEach(tipo => {
+        const lista = document.getElementById('lista' + tipo.charAt(0).toUpperCase() + tipo.slice(1));
+        const pessoas = tipo === 'membros' ? membros : convidados;
+        lista.innerHTML = pessoas.map((nome, i) => `
+          <label>
+            <input type="checkbox" id="${tipo}-${i}" ${tipo === 'membros' && selecionadosM.includes(nome) ? 'checked' : ''} ${tipo === 'convidados' && selecionadosC.includes(nome) ? 'checked' : ''}/> ${nome}
+          </label>`).join('');
+      });
     }
 
-    function atualizarResumo() {
-      const resumoDiv = document.getElementById('resumoConteudo');
-      resumoDiv.innerHTML = `
-        <p><strong>Membros Presentes:</strong> ${relatorioSalvo.membros || '(nenhum)'}</p>
-        <p><strong>Convidados:</strong> ${relatorioSalvo.convidados || '(nenhum)'}</p>
-        <p><strong>Oferta:</strong> R$ ${relatorioSalvo.oferta || '0,00'}</p>
-        <p><strong>Supervisão:</strong> ${relatorioSalvo.supervisao === 'sim' ? 'Sim' : 'Não'}</p>
+    function definirSupervisao(valor) {
+      supervisao = valor;
+      alert("Supervisão marcada como: " + (valor ? "Sim" : "Não"));
+    }
+
+    function gerarResumoFinal() {
+      const presentesM = membros.map((nome, i) => document.getElementById(`membros-${i}`)?.checked ? nome : null).filter(Boolean);
+      const presentesC = convidados.map((nome, i) => document.getElementById(`convidados-${i}`)?.checked ? nome : null).filter(Boolean);
+      const oferta = parseFloat(document.getElementById('valorOferta').value || 0);
+
+      document.getElementById('resumoFinal').innerHTML = `
+        <p><strong>Data:</strong> ${document.getElementById('dataReuniao').value}</p>
+        <p><strong>Membros Presentes:</strong> ${presentesM.join(', ')}</p>
+        <p><strong>Convidados Presentes:</strong> ${presentesC.join(', ')}</p>
+        <p><strong>Supervisão:</strong> ${supervisao ? "Sim" : "Não"}</p>
+        <p><strong>Oferta:</strong> R$ ${oferta.toFixed(2)}</p>
       `;
+    }
+
+    function finalizarRelatorio() {
+      const data = document.getElementById('dataReuniao').value;
+      const presentesM = membros.map((nome, i) => document.getElementById(`membros-${i}`)?.checked ? nome : null).filter(Boolean);
+      const presentesC = convidados.map((nome, i) => document.getElementById(`convidados-${i}`)?.checked ? nome : null).filter(Boolean);
+      const oferta = parseFloat(document.getElementById('valorOferta').value || 0);
+
+      const relatorio = { data, presentesM, presentesC, supervisao, oferta };
+      if (indexEditando !== null) {
+        relatorios[indexEditando] = relatorio;
+        indexEditando = null;
+      } else {
+        relatorios.push(relatorio);
+      }
+      localStorage.setItem('relatorios', JSON.stringify(relatorios));
+      alert("Relatório salvo!");
+      irPara('menu');
+    }
+
+    function mostrarResumo() {
+      const totalRel = relatorios.length;
+      const totalMembros = relatorios.reduce((soma, r) => soma + r.presentesM.length, 0);
+      const totalConvidados = relatorios.reduce((soma, r) => soma + r.presentesC.length, 0);
+      const totalOferta = relatorios.reduce((soma, r) => soma + r.oferta, 0);
+      const ultimaSupervisao = relatorios.slice().reverse().find(r => r.supervisao)?.data || 'Nunca';
+
+      const mediaM = totalRel ? (totalMembros / totalRel).toFixed(1) : 0;
+      const mediaC = totalRel ? (totalConvidados / totalRel).toFixed(1) : 0;
+      const mediaOferta = totalRel ? (totalOferta / totalRel).toFixed(2) : 0;
+
+      document.getElementById('resumoGeral').innerHTML = `
+        <p><strong>Média de Membros:</strong> ${mediaM}</p>
+        <p><strong>Média de Convidados:</strong> ${mediaC}</p>
+        <p><strong>Total de Ofertas:</strong> R$ ${totalOferta.toFixed(2)}</p>
+        <p><strong>Média de Oferta:</strong> R$ ${mediaOferta}</p>
+        <p><strong>Última Supervisão:</strong> ${ultimaSupervisao}</p>
+      `;
+    }
+
+    function listarRelatorios() {
+      const container = document.getElementById('relatoriosLista');
+      container.innerHTML = relatorios.map((r, i) => `
+        <div class="resumo-box">
+          <strong>Relatório ${r.data}</strong>
+          <pre>${JSON.stringify(r, null, 2)}</pre>
+          <button onclick="editarRelatorio(${i})">Editar</button>
+        </div>
+      `).join('');
+    }
+
+    function editarRelatorio(index) {
+      const r = relatorios[index];
+      indexEditando = index;
+      document.getElementById('dataReuniao').value = r.data;
+      document.getElementById('valorOferta').value = r.oferta;
+      supervisao = r.supervisao;
+      irPara('relatorio');
+      setTimeout(() => {
+        renderizarListas(r.presentesM, r.presentesC);
+      }, 200);
     }
   </script>
 </body>
