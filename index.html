@@ -2,149 +2,97 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Life Elohim</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="icon.png" />
   <meta name="theme-color" content="#b28bff" />
-  <link href="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.css" rel="stylesheet" />
   <style>
     body { font-family: sans-serif; margin: 0; padding: 0; background: #f3f3f3; }
     .tela, .step { display: none; padding: 20px; }
     .visivel { display: block; }
-    button {
-      margin: 10px 0;
-      padding: 10px 20px;
-      background: #b28bff;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    input[type="text"], input[type="number"], input[type="date"] {
-      padding: 8px;
-      width: 100%;
-      margin: 5px 0 15px;
-    }
+    button { margin: 10px 0; padding: 10px; background: #b28bff; color: white; border: none; border-radius: 8px; cursor: pointer; width: 100%; }
+    input[type="text"], input[type="number"], input[type="date"] { padding: 8px; width: 100%; margin: 5px 0 15px; }
     .lista label { display: block; margin-bottom: 8px; }
-    .marcado { font-weight: bold; color: #b28bff; }
+    .resumo-box { background: #fff; border-radius: 12px; padding: 15px; box-shadow: 0 0 10px #ccc; margin-top: 10px; }
     .botoes { display: flex; flex-direction: column; gap: 10px; }
-    .opcoes-sim-nao button {
-      width: 100%;
-      background: #ccc;
-    }
-    .opcoes-sim-nao .selecionado {
-      background: #b28bff;
-      color: white;
-    }
-    .resumo-box {
-      background: #fff;
-      border-radius: 12px;
-      padding: 15px;
-      box-shadow: 0 0 10px #ccc;
-      margin-top: 10px;
-    }
-    .editar-btn {
-      font-size: 12px;
-      background: transparent;
-      color: #b28bff;
-      text-decoration: underline;
-      padding: 0;
-      margin-top: 5px;
-    }
-    .filtro-data {
-      margin: 10px 0;
-    }
+    .opcoes-sim-nao button.ativo { background-color: #9d6bff; }
+    .topo-voltar { margin-bottom: 10px; display: inline-block; cursor: pointer; color: #b28bff; text-decoration: underline; }
+    .icone { font-size: 1.2rem; margin-right: 6px; }
+    .editar-btn { font-size: 0.9em; color: #b28bff; background: transparent; border: none; cursor: pointer; }
+    .editar-btn:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
   <div id="tela-menu" class="tela visivel">
-    <h2>Menu</h2>
-    <button onclick="irPara('relatorio')"><i class="lucide lucide-file-plus"></i> Fazer Relatórios</button>
-    <button onclick="irPara('verRelatorios')"><i class="lucide lucide-folder-search"></i> Ver Relatórios</button>
+    <h2>📅 Life Elohim</h2>
+    <button onclick="irPara('relatorio')">📝 Fazer Relatórios</button>
+    <button onclick="irPara('verRelatorios')">📋 Ver Relatórios</button>
   </div>
 
   <!-- Etapas de Relatório -->
   <div id="tela-relatorio" class="tela">
+    <span class="topo-voltar" onclick="irPara('menu')">⬅ Voltar</span>
     <div id="etapa-1" class="step visivel">
       <h3>1. Data da Reunião</h3>
       <input type="date" id="dataReuniao" />
-      <div class="botoes">
-        <button onclick="irPara('menu')">Voltar</button>
-        <button onclick="proximaEtapa(2)">Avançar</button>
-      </div>
+      <button onclick="proximaEtapa(2)">Avançar</button>
     </div>
+
     <div id="etapa-2" class="step">
       <h3>2. Membros Presentes</h3>
       <div id="listaMembros" class="lista"></div>
       <input type="text" id="novoMembro" placeholder="Novo membro" />
       <div class="botoes">
         <button onclick="adicionarPessoa('membro')">Adicionar</button>
-        <button onclick="proximaEtapa(3)">Avançar</button>
-        <button onclick="proximaEtapa(1)">Voltar</button>
       </div>
+      <button onclick="proximaEtapa(3)">Avançar</button>
     </div>
+
     <div id="etapa-3" class="step">
       <h3>3. Convidados Presentes</h3>
       <div id="listaConvidados" class="lista"></div>
       <input type="text" id="novoConvidado" placeholder="Novo convidado" />
       <div class="botoes">
         <button onclick="adicionarPessoa('convidado')">Adicionar</button>
-        <button onclick="proximaEtapa(4)">Avançar</button>
-        <button onclick="proximaEtapa(2)">Voltar</button>
       </div>
+      <button onclick="proximaEtapa(4)">Avançar</button>
     </div>
+
     <div id="etapa-4" class="step">
       <h3>4. Houve Supervisão?</h3>
       <div class="opcoes-sim-nao">
         <button id="btnSim" onclick="definirSupervisao(true)">Sim</button>
         <button id="btnNao" onclick="definirSupervisao(false)">Não</button>
       </div>
-      <div class="botoes">
-        <button onclick="proximaEtapa(5)">Avançar</button>
-        <button onclick="proximaEtapa(3)">Voltar</button>
-      </div>
+      <button onclick="proximaEtapa(5)">Avançar</button>
     </div>
+
     <div id="etapa-5" class="step">
       <h3>5. Valor da Oferta</h3>
       <input type="number" id="valorOferta" placeholder="Valor em R$" />
-      <div class="botoes">
-        <button onclick="proximaEtapa(6); gerarResumoFinal()">Avançar</button>
-        <button onclick="proximaEtapa(4)">Voltar</button>
-      </div>
+      <button onclick="proximaEtapa(6)">Avançar</button>
     </div>
+
     <div id="etapa-6" class="step">
       <h3>6. Resumo</h3>
       <div id="resumoFinal" class="resumo-box"></div>
-      <div class="botoes">
-        <button onclick="finalizarRelatorio()">Finalizar Relatório</button>
-        <button onclick="irPara('menu')">Cancelar Envio</button>
-        <button onclick="proximaEtapa(5)">Voltar</button>
-      </div>
+      <button onclick="finalizarRelatorio()">Finalizar Relatório</button>
+      <button onclick="irPara('menu')">Cancelar</button>
     </div>
   </div>
 
   <!-- Ver Relatórios -->
   <div id="tela-verRelatorios" class="tela">
-    <h2>Ver Relatórios</h2>
-    <input type="date" id="filtroData" class="filtro-data" onchange="listarRelatorios()" />
-    <button onclick="mostrarResumo()">Ver Resumo Geral</button>
-    <button onclick="exportarPDF()">Exportar PDF</button>
-    <button onclick="irPara('menu')">Voltar</button>
+    <span class="topo-voltar" onclick="irPara('menu')">⬅ Voltar</span>
+    <h2>📋 Ver Relatórios</h2>
     <div id="relatoriosLista"></div>
-    <div id="resumoGeral" class="resumo-box"></div>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
     let membros = JSON.parse(localStorage.getItem('membros') || "[]");
     let convidados = JSON.parse(localStorage.getItem('convidados') || "[]");
     let relatorios = JSON.parse(localStorage.getItem('relatorios') || "[]");
-    let supervisao = false;
-    let indexEditando = null;
 
     function irPara(tela) {
       document.querySelectorAll('.tela').forEach(t => t.classList.remove('visivel'));
@@ -154,11 +102,13 @@
       }
       document.getElementById('tela-' + tela).classList.add('visivel');
       renderizarListas();
+      if (tela === 'verRelatorios') listarRelatorios();
     }
 
     function proximaEtapa(num) {
       document.querySelectorAll('.step').forEach(e => e.classList.remove('visivel'));
       document.getElementById('etapa-' + num).classList.add('visivel');
+      if (num === 6) mostrarResumoFinal();
     }
 
     function adicionarPessoa(tipo) {
@@ -173,34 +123,34 @@
       renderizarListas();
     }
 
-    function renderizarListas(selecionadosM = [], selecionadosC = []) {
+    function renderizarListas() {
       ['membros', 'convidados'].forEach(tipo => {
         const lista = document.getElementById('lista' + tipo.charAt(0).toUpperCase() + tipo.slice(1));
         const pessoas = tipo === 'membros' ? membros : convidados;
         lista.innerHTML = pessoas.map((nome, i) => `
           <label>
-            <input type="checkbox" id="${tipo}-${i}" ${tipo === 'membros' && selecionadosM.includes(nome) ? 'checked' : ''} ${tipo === 'convidados' && selecionadosC.includes(nome) ? 'checked' : ''}/> ${nome}
+            <input type="checkbox" id="${tipo}-${i}" /> ${nome}
           </label>`).join('');
       });
     }
 
+    let supervisao = false;
     function definirSupervisao(valor) {
       supervisao = valor;
-      document.getElementById('btnSim').classList.toggle('selecionado', valor);
-      document.getElementById('btnNao').classList.toggle('selecionado', !valor);
+      document.getElementById('btnSim').classList.remove('ativo');
+      document.getElementById('btnNao').classList.remove('ativo');
+      document.getElementById(valor ? 'btnSim' : 'btnNao').classList.add('ativo');
     }
 
-    function gerarResumoFinal() {
+    function mostrarResumoFinal() {
       const presentesM = membros.map((nome, i) => document.getElementById(`membros-${i}`)?.checked ? nome : null).filter(Boolean);
       const presentesC = convidados.map((nome, i) => document.getElementById(`convidados-${i}`)?.checked ? nome : null).filter(Boolean);
       const oferta = parseFloat(document.getElementById('valorOferta').value || 0);
-
       document.getElementById('resumoFinal').innerHTML = `
-        <p><strong>Data:</strong> ${document.getElementById('dataReuniao').value}</p>
-        <p><strong>Membros Presentes:</strong> ${presentesM.join(', ')}</p>
-        <p><strong>Convidados Presentes:</strong> ${presentesC.join(', ')}</p>
-        <p><strong>Supervisão:</strong> ${supervisao ? "Sim" : "Não"}</p>
+        <p><strong>Membros:</strong> ${presentesM.join(', ')}</p>
+        <p><strong>Convidados:</strong> ${presentesC.join(', ')}</p>
         <p><strong>Oferta:</strong> R$ ${oferta.toFixed(2)}</p>
+        <p><strong>Supervisão:</strong> ${supervisao ? 'Sim' : 'Não'}</p>
       `;
     }
 
@@ -209,92 +159,56 @@
       const presentesM = membros.map((nome, i) => document.getElementById(`membros-${i}`)?.checked ? nome : null).filter(Boolean);
       const presentesC = convidados.map((nome, i) => document.getElementById(`convidados-${i}`)?.checked ? nome : null).filter(Boolean);
       const oferta = parseFloat(document.getElementById('valorOferta').value || 0);
-
       const relatorio = { data, presentesM, presentesC, supervisao, oferta };
-      if (indexEditando !== null) {
-        relatorios[indexEditando] = relatorio;
-        indexEditando = null;
-      } else {
-        relatorios.push(relatorio);
-      }
+      relatorios.push(relatorio);
       localStorage.setItem('relatorios', JSON.stringify(relatorios));
       alert("Relatório salvo!");
       irPara('menu');
     }
 
-    function mostrarResumo() {
-      const totalRel = relatorios.length;
-      const totalMembros = relatorios.reduce((soma, r) => soma + r.presentesM.length, 0);
-      const totalConvidados = relatorios.reduce((soma, r) => soma + r.presentesC.length, 0);
-      const totalOferta = relatorios.reduce((soma, r) => soma + r.oferta, 0);
-      const ultimaSupervisao = relatorios.slice().reverse().find(r => r.supervisao)?.data || 'Nunca';
-
-      const mediaM = totalRel ? (totalMembros / totalRel).toFixed(1) : 0;
-      const mediaC = totalRel ? (totalConvidados / totalRel).toFixed(1) : 0;
-      const mediaOferta = totalRel ? (totalOferta / totalRel).toFixed(2) : 0;
-
-      document.getElementById('resumoGeral').innerHTML = `
-        <p><strong>Média de Membros:</strong> ${mediaM}</p>
-        <p><strong>Média de Convidados:</strong> ${mediaC}</p>
-        <p><strong>Total de Ofertas:</strong> R$ ${totalOferta.toFixed(2)}</p>
-        <p><strong>Média de Oferta:</strong> R$ ${mediaOferta}</p>
-        <p><strong>Última Supervisão:</strong> ${ultimaSupervisao}</p>
-      `;
-    }
-
     function listarRelatorios() {
-      const filtro = document.getElementById('filtroData').value;
       const container = document.getElementById('relatoriosLista');
-      container.innerHTML = relatorios
-        .map((r, i) => ({...r, i}))
-        .filter(r => !filtro || r.data === filtro)
-        .map(r => `
-          <div class="resumo-box">
-            <strong>Relatório ${r.data}</strong>
-            <p>Membros: ${r.presentesM.join(', ')}</p>
-            <p>Convidados: ${r.presentesC.join(', ')}</p>
-            <p>Supervisão: ${r.supervisao ? 'Sim' : 'Não'}</p>
-            <p>Oferta: R$ ${r.oferta.toFixed(2)}</p>
-            <button class="editar-btn" onclick="editarRelatorio(${r.i})">Editar</button>
-          </div>
-        `).join('');
+      container.innerHTML = relatorios.map((r, i) => `
+        <div class="resumo-box">
+          <p><strong>Data:</strong> ${r.data}</p>
+          <p><strong>Membros:</strong> ${r.presentesM.join(', ')}</p>
+          <p><strong>Convidados:</strong> ${r.presentesC.join(', ')}</p>
+          <p><strong>Oferta:</strong> R$ ${r.oferta.toFixed(2)}</p>
+          <p><strong>Supervisão:</strong> ${r.supervisao ? 'Sim' : 'Não'}</p>
+          <button class="editar-btn" onclick="editarRelatorio(${i})">✏️ Editar</button>
+        </div>
+      `).join('');
     }
 
     function editarRelatorio(index) {
       const r = relatorios[index];
-      indexEditando = index;
       document.getElementById('dataReuniao').value = r.data;
+      membros.forEach((nome, i) => document.getElementById(`membros-${i}`).checked = r.presentesM.includes(nome));
+      convidados.forEach((nome, i) => document.getElementById(`convidados-${i}`).checked = r.presentesC.includes(nome));
       document.getElementById('valorOferta').value = r.oferta;
-      supervisao = r.supervisao;
       definirSupervisao(r.supervisao);
       irPara('relatorio');
-      setTimeout(() => {
-        renderizarListas(r.presentesM, r.presentesC);
-      }, 200);
     }
 
-    async function exportarPDF() {
-      const {{ jsPDF }} = window.jspdf;
-      const doc = new jsPDF();
-      doc.text("Relatórios Life Elohim", 10, 10);
-      relatorios.forEach((r, i) => {
-        doc.text(`Data: ${r.data} | Membros: ${r.presentesM.length} | Convidados: ${r.presentesC.length} | Oferta: R$ ${r.oferta.toFixed(2)}`, 10, 20 + (i * 10));
-      });
-      doc.save("relatorios.pdf");
-    }
-
-    // Notificação semanal quinta-feira 19h30 Manaus
+    // Notificação via navegador quinta 19:30 (Manaus)
     if ('Notification' in window && Notification.permission !== 'denied') {
       Notification.requestPermission();
     }
-    setInterval(() => {
+
+    function agendarNotificacao() {
       const agora = new Date();
-      if (agora.getUTCDay() === 4 && agora.getUTCHours() === 23 && agora.getUTCMinutes() === 30) {
-        if (Notification.permission === 'granted') {
-          new Notification("Lembrete Life Elohim", { body: "Preencha seu relatório semanal!" });
-        }
+      const dia = agora.getDay();
+      const hora = agora.getHours();
+      const minutos = agora.getMinutes();
+
+      // Quinta-feira 19:30
+      if (dia === 4 && hora === 19 && minutos === 30) {
+        new Notification("Lembrete", {
+          body: "Hora de preencher o relatório da reunião no Life Elohim!",
+        });
       }
-    }, 60000);
+    }
+    setInterval(agendarNotificacao, 60000); // Verifica a cada minuto
   </script>
 </body>
 </html>
